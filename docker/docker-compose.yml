@@ -1,0 +1,153 @@
+version: '3.8'
+
+# MCP Servers and AI Infrastructure
+# All containers for Omarchy dotfiles setup
+
+networks:
+  mcp-network:
+    driver: bridge
+
+services:
+  # Ollama - Local LLM inference server
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-data:/root/.ollama
+    restart: unless-stopped
+    networks:
+      - mcp-network
+    # Uncomment for GPU support (NVIDIA only)
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: 1
+    #           capabilities: [gpu]
+
+  # Open WebUI - Web interface for Ollama
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:main
+    container_name: open-webui
+    depends_on:
+      - ollama
+    environment:
+      - OLLAMA_BASE_URL=http://ollama:11434
+    volumes:
+      - open-webui-data:/app/backend/data
+    restart: unless-stopped
+    networks:
+      - mcp-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # MCP Docker Manager
+  mcp-docker-manager:
+    image: mcp-docker-manager:latest
+    container_name: mcp-docker-manager
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    restart: unless-stopped
+    networks:
+      - mcp-network
+
+  # MCP Filesystem
+  mcp-filesystem:
+    image: mcp-filesystem:latest
+    container_name: mcp-filesystem
+    volumes:
+      - ${HOME}:/host-home:ro
+    restart: unless-stopped
+    networks:
+      - mcp-network
+
+  # MCP Obsidian
+  mcp-obsidian:
+    image: mcp-obsidian:latest
+    container_name: mcp-obsidian
+    volumes:
+      - ${HOME}/Documents/Obsidian:/vault:rw
+    restart: unless-stopped
+    networks:
+      - mcp-network
+
+  # MCP PyTorch Inspector
+  mcp-pytorch-inspector:
+    image: mcp-pytorch-inspector:latest
+    container_name: mcp-pytorch-inspector
+    volumes:
+      - ${HOME}/ai-workspace/models:/models:ro
+    restart: unless-stopped
+    networks:
+      - mcp-network
+
+  # MCP RSS Aggregator
+  mcp-rss-aggregator:
+    image: mcp-rss-aggregator:latest
+    container_name: mcp-rss-aggregator
+    restart: unless-stopped
+    networks:
+      - mcp-network
+
+  # MCP LibreCAD
+  mcp-librecad:
+    image: mcp-librecad:latest
+    container_name: mcp-librecad
+    ports:
+      - "5900:5900"  # VNC port
+    restart: unless-stopped
+    networks:
+      - mcp-network
+
+  # MCP Markdown Converter
+  mcp-markdown-converter:
+    image: mcp-markdown-converter:latest
+    container_name: mcp-markdown-converter
+    volumes:
+      - ${HOME}/Documents:/documents:rw
+    restart: unless-stopped
+    networks:
+      - mcp-network
+
+  # MCP GPU Optimizer (NVIDIA only - disable on T420s with Intel GPU)
+  mcp-gpu-optimizer:
+    image: mcp-gpu-optimizer:latest
+    container_name: mcp-gpu-optimizer
+    restart: unless-stopped
+    networks:
+      - mcp-network
+    profiles:
+      - nvidia-gpu
+
+  # MCP Kali Tools (Security testing - large image)
+  mcp-kali-tools:
+    image: mcp-kali-tools:latest
+    container_name: mcp-kali-tools
+    restart: unless-stopped
+    networks:
+      - mcp-network
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+
+  # PhoneInfoga - OSINT tool
+  phoneinfoga:
+    image: sundowndev/phoneinfoga:latest
+    container_name: phoneinfoga
+    ports:
+      - "8081:8080"
+    restart: unless-stopped
+    networks:
+      - mcp-network
+
+volumes:
+  ollama-data:
+    driver: local
+  open-webui-data:
+    driver: local

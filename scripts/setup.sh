@@ -1,18 +1,19 @@
 #!/bin/bash
 
 # Omarchy Dotfiles Setup Script
-# This script helps deploy your dotfiles to a new Omarchy installation
+# Automated deployment with hardware detection
 
 set -e  # Exit on error
 
 DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 BACKUP_DIR="$HOME/.dotfiles-backup-$(date +%Y%m%d-%H%M%S)"
 
-# Colors for output
+# Colors
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
-NC='\033[0m' # No Color
+BLUE='\033[0;34m'
+NC='\033[0m'
 
 info() {
     echo -e "${GREEN}[INFO]${NC} $1"
@@ -42,14 +43,8 @@ create_symlink() {
     local target="$2"
 
     backup_if_exists "$target"
-
-    # Remove existing file/link
     rm -rf "$target"
-
-    # Create parent directory if needed
     mkdir -p "$(dirname "$target")"
-
-    # Create symlink
     ln -sf "$source" "$target"
     info "Linked $source -> $target"
 }
@@ -59,6 +54,36 @@ echo "  Omarchy Dotfiles Setup"
 echo "======================================"
 echo ""
 
+# Run hardware detection
+if [ -f "$DOTFILES_DIR/scripts/detect-hardware.sh" ]; then
+    info "Running hardware detection..."
+    "$DOTFILES_DIR/scripts/detect-hardware.sh"
+    source /tmp/hardware-profile.env
+    echo ""
+else
+    warn "Hardware detection script not found"
+    HARDWARE_PROFILE="generic"
+fi
+
+# Run hardware-specific pre-setup if needed
+if [ "$HARDWARE_PROFILE" = "t420s" ]; then
+    warn "T420s detected! Running hardware-specific adjustments..."
+    echo ""
+
+    if [ -f "$DOTFILES_DIR/hardware/t420s/pre-setup.sh" ]; then
+        read -p "Run T420s pre-setup script to adjust configs? (Y/n) " -n 1 -r
+        echo
+        if [[ ! $REPLY =~ ^[Nn]$ ]]; then
+            "$DOTFILES_DIR/hardware/t420s/pre-setup.sh"
+            echo ""
+        fi
+    else
+        warn "T420s pre-setup script not found"
+        warn "You may need to manually adjust configs for T420s hardware"
+        echo ""
+    fi
+fi
+
 # Confirm before proceeding
 read -p "This will symlink dotfiles from $DOTFILES_DIR. Continue? (y/N) " -n 1 -r
 echo
@@ -66,6 +91,8 @@ if [[ ! $REPLY =~ ^[Yy]$ ]]; then
     error "Setup cancelled"
     exit 1
 fi
+
+echo ""
 
 # Link Hyprland configs
 info "Setting up Hyprland configurations..."
@@ -86,8 +113,84 @@ if [ -d "$BACKUP_DIR" ]; then
 fi
 
 echo ""
-echo "Next steps:"
-echo "  1. Review your configurations in ~/.config/"
-echo "  2. Install packages: ./scripts/install-packages.sh"
-echo "  3. Restart Hyprland or log out/in"
+echo "======================================"
+echo "  Next Steps"
+echo "======================================"
+
+# Hardware-specific recommendations
+if [ "$HARDWARE_PROFILE" = "surface" ]; then
+    info "Surface Laptop Studio detected"
+    echo ""
+    echo "Recommended actions:"
+    echo "  1. Install packages: $DOTFILES_DIR/scripts/install-packages.sh"
+    echo "  2. Deploy MCP servers: $DOTFILES_DIR/scripts/deploy-mcp.sh"
+    echo "  3. Enable iptsd: sudo systemctl enable --now iptsd@dev-hidraw7.service"
+    echo "  4. Restart Hyprland (logout/login or Super+Shift+Q)"
+    echo ""
+
+elif [ "$HARDWARE_PROFILE" = "t420s" ]; then
+    info "Lenovo T420s detected"
+    echo ""
+    echo "Recommended actions:"
+    echo "  1. Review adjusted configs in ~/.config/"
+    echo "  2. Install packages: $DOTFILES_DIR/scripts/install-packages.sh"
+    echo "     (Will use T420s-specific package list)"
+    echo "  3. Deploy MCP servers: $DOTFILES_DIR/scripts/deploy-mcp.sh"
+    echo "     (GPU containers will be disabled automatically)"
+    if [ "$HAS_NVIDIA" = true ]; then
+        echo "  4. Install NVIDIA drivers: $NVIDIA_DRIVER"
+    fi
+    echo "  5. Enable TLP: sudo systemctl enable --now tlp.service"
+    echo "  6. Enable thermald: sudo systemctl enable --now thermald.service"
+    echo "  7. Restart Hyprland (logout/login)"
+    echo ""
+
+else
+    echo "Recommended actions:"
+    echo "  1. Review configurations in ~/.config/"
+    echo "  2. Adjust for your hardware if needed"
+    echo "  3. Install packages: $DOTFILES_DIR/scripts/install-packages.sh"
+    echo "  4. Deploy MCP servers: $DOTFILES_DIR/scripts/deploy-mcp.sh"
+    echo "  5. Restart Hyprland or log out/in"
+    echo ""
+fi
+
+# Offer to continue with automation
+echo ""
+read -p "Would you like to continue with automated setup? (install packages + MCP) (y/N) " -n 1 -r
+echo
+if [[ $REPLY =~ ^[Yy]$ ]]; then
+    echo ""
+    info "Continuing with automated setup..."
+    echo ""
+
+    # Install packages
+    if [ -f "$DOTFILES_DIR/scripts/install-packages.sh" ]; then
+        info "Starting package installation..."
+        "$DOTFILES_DIR/scripts/install-packages.sh"
+    else
+        warn "Package installer not found, skipping..."
+    fi
+
+    echo ""
+
+    # Deploy MCP
+    if [ -f "$DOTFILES_DIR/scripts/deploy-mcp.sh" ]; then
+        read -p "Deploy MCP containers? (y/N) " -n 1 -r
+        echo
+        if [[ $REPLY =~ ^[Yy]$ ]]; then
+            "$DOTFILES_DIR/scripts/deploy-mcp.sh"
+        fi
+    fi
+
+    echo ""
+    info "Automated setup complete!"
+else
+    info "You can run the scripts manually when ready"
+fi
+
+echo ""
+echo "======================================"
+info "Setup finished! Enjoy your dotfiles!"
+echo "======================================"
 echo ""
