@@ -167,6 +167,16 @@ create_symlink "$DOTFILES_DIR/.config/waybar" "$HOME/.config/waybar"
 info "Linking Omarchy configs..."
 create_symlink "$DOTFILES_DIR/.config/omarchy" "$HOME/.config/omarchy"
 
+# Fix theme symlinks (need to be relative, not absolute)
+info "Setting up theme symlinks..."
+mkdir -p "$HOME/.config/omarchy/current"
+cd "$HOME/.config/omarchy/current"
+rm -f theme background
+ln -sf ../themes/reverie theme
+ln -sf theme/backgrounds/1.jpg background
+cd "$DOTFILES_DIR"
+info "✓ Theme symlinks created"
+
 info "Linking .bashrc..."
 create_symlink "$DOTFILES_DIR/.bashrc" "$HOME/.bashrc"
 

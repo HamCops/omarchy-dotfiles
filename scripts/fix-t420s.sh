@@ -94,16 +94,14 @@ else
 fi
 
 # 4. Fix Theme Symlinks
-info "Checking theme symlinks..."
-if [ ! -L "$HOME/.config/omarchy/current/theme" ]; then
-    warn "Theme symlink missing, creating..."
-    mkdir -p "$HOME/.config/omarchy/current"
-    ln -sf "$DOTFILES_DIR/.config/omarchy/themes/reverie" "$HOME/.config/omarchy/current/theme"
-    ln -sf "$HOME/.config/omarchy/current/theme/backgrounds/1.jpg" "$HOME/.config/omarchy/current/background"
-    info "✓ Theme symlinks created"
-else
-    info "✓ Theme symlinks OK"
-fi
+info "Fixing theme symlinks..."
+mkdir -p "$HOME/.config/omarchy/current"
+cd "$HOME/.config/omarchy/current"
+rm -f theme background
+ln -sf ../themes/reverie theme
+ln -sf theme/backgrounds/1.jpg background
+cd - > /dev/null
+info "✓ Theme symlinks created (using relative paths)"
 
 # 5. Check for missing packages
 echo ""
