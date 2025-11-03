@@ -7,16 +7,20 @@
 ```bash
 git clone https://github.com/YOUR_USERNAME/omarchy-dotfiles.git ~/Projects/omarchy-dotfiles
 cd ~/Projects/omarchy-dotfiles
-./scripts/setup.sh
+./install.sh
 ```
 
-That's it! The setup script will:
+That's it! The unified installer will:
 1. ✅ Detect your hardware (Surface, T420s, or generic)
-2. ✅ Run hardware-specific adjustments if needed
+2. ✅ Run hardware-specific adjustments automatically
 3. ✅ Backup your existing configs
 4. ✅ Link dotfiles to ~/.config/
-5. ✅ Offer to install packages automatically
-6. ✅ Offer to deploy MCP containers
+5. ✅ Install ALL packages automatically
+6. ✅ Deploy Docker & MCP containers automatically
+7. ✅ Update system packages
+8. ✅ Configure services (TLP, thermald, etc.)
+
+**No more juggling multiple scripts!** Everything runs in one go.
 
 ### What Happens on T420s
 
@@ -38,34 +42,36 @@ When the script detects a Surface:
 
 ---
 
-## Manual Commands (if you prefer step-by-step)
+## Manual Step-by-Step (Advanced Users Only)
+
+If you prefer to run each step manually:
 
 ### 1. Hardware Detection Only
 ```bash
 ./scripts/detect-hardware.sh
 ```
 
-### 2. T420s Pre-Setup (run BEFORE setup.sh)
+### 2. T420s Pre-Setup (run BEFORE linking)
 ```bash
 ./hardware/t420s/pre-setup.sh
 ```
 
-### 3. Link Dotfiles
+### 3. Link Dotfiles Only
 ```bash
 ./scripts/setup.sh
 ```
 
-### 4. Install Packages
+### 4. Install Packages Only
 ```bash
 ./scripts/install-packages.sh
 ```
-Automatically uses T420s package list if T420s detected.
 
-### 5. Deploy MCP Containers
+### 5. Deploy MCP Containers Only
 ```bash
 ./scripts/deploy-mcp.sh
 ```
-Automatically disables GPU containers on T420s.
+
+**Note:** The unified `install.sh` handles all of this automatically. Use manual steps only if you need granular control.
 
 ---
 
@@ -161,14 +167,15 @@ sudo pacman -S yay
 
 ```
 omarchy-dotfiles/
+├── install.sh                # 🌟 UNIFIED INSTALLER - RUN THIS!
 ├── scripts/
-│   ├── setup.sh              # Main setup (run this first)
-│   ├── detect-hardware.sh    # Hardware detection
-│   ├── install-packages.sh   # Package installer
-│   └── deploy-mcp.sh         # MCP container deployment
+│   ├── setup.sh              # Dotfiles linking only (used by install.sh)
+│   ├── detect-hardware.sh    # Hardware detection (used by install.sh)
+│   ├── install-packages.sh   # Package installer (used by install.sh)
+│   └── deploy-mcp.sh         # MCP deployment (used by install.sh)
 ├── hardware/
 │   ├── t420s/
-│   │   └── pre-setup.sh      # T420s config adjuster
+│   │   └── pre-setup.sh      # T420s config adjuster (used by install.sh)
 │   └── surface/
 │       └── README.md         # Surface-specific notes
 ├── docker/
@@ -184,11 +191,11 @@ omarchy-dotfiles/
 
 ## Quick Tips
 
-- **Always run `./scripts/setup.sh` first** - it handles everything
-- **Answer 'y' to automation prompts** if you want hands-off setup
-- **On T420s**: Answer 'Y' when asked about pre-setup adjustments
+- **Just run `./install.sh`** - Everything is automated!
+- **On T420s**: The installer automatically detects and adjusts configs
 - **Backups are automatic** - check ~/.dotfiles-backup-* if you need to restore
+- **No prompts for core setup** - Only asks about AI Development bundle and reboot
 
 ---
 
-Ready to deploy to your T420s? Just clone and run `./scripts/setup.sh`!
+Ready to deploy to your T420s? Just clone and run `./install.sh`!

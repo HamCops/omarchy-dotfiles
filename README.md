@@ -2,6 +2,18 @@
 
 My personal Omarchy (Arch Linux) configuration for Hyprland, optimized for Microsoft Surface Laptop Studio and Lenovo T420s.
 
+---
+
+## 🚀 **NEW: Unified One-Command Installer**
+
+```bash
+./install.sh
+```
+
+**Everything is now automated!** No more juggling multiple scripts. Just run `./install.sh` and it handles hardware detection, config adjustments, package installation, Docker deployment, and system setup automatically.
+
+---
+
 ## System Overview
 
 This dotfiles repository contains configurations for:
@@ -72,72 +84,53 @@ See [hardware/HARDWARE_DIFFERENCES.md](hardware/HARDWARE_DIFFERENCES.md) for det
 3. Git installed: `sudo pacman -S git`
 4. (Optional) yay AUR helper: `sudo pacman -S yay`
 
-### Installation
-
-#### 1. Clone this repository
+### Installation - ONE COMMAND!
 
 ```bash
+# Clone the repository
 cd ~/Projects  # or your preferred location
 git clone https://github.com/YOUR_USERNAME/omarchy-dotfiles.git
 cd omarchy-dotfiles
+
+# Run the unified installer
+./install.sh
 ```
 
-#### 2. Review and customize (IMPORTANT!)
+**That's it!** The unified installer handles EVERYTHING:
+- ✅ Detects your hardware (Surface, T420s, or generic)
+- ✅ Runs hardware-specific adjustments automatically
+- ✅ Backs up existing configs to `~/.dotfiles-backup-<timestamp>`
+- ✅ Symlinks all dotfiles to `~/.config/`
+- ✅ Installs ALL packages automatically
+- ✅ Deploys Docker & MCP containers
+- ✅ Updates system packages
+- ✅ Configures services (TLP, thermald, etc.)
+- ✅ Offers optional reboot
 
-Before running setup, review and adjust for your hardware:
+The script only asks you about:
+- AI Development Bundle (optional ~18 packages, ~5GB)
+- System reboot at the end
 
-```bash
-# Check hardware-specific notes
-cat hardware/HARDWARE_DIFFERENCES.md
+**No more running multiple scripts!** Everything is connected and runs in sequence.
 
-# Review additional packages to install
-# Note: packages.txt contains ONLY additional packages beyond base Omarchy
-# Base Omarchy packages (161) are already installed by default
-cat packages.txt
-
-# For T420s, the hardware detection will automatically:
-# - Filter incompatible packages (cuda, cudnn, iptsd)
-# - Use nvidia-390xx-dkms for legacy GPU if present
-# - Skip Surface-specific packages
-
-# If you want to customize further:
-nano packages.txt
-```
-
-#### 3. Run the setup script
-
-```bash
-./scripts/setup.sh
-```
-
-This will:
-- Backup your existing configs to `~/.dotfiles-backup-<timestamp>`
-- Create symlinks from this repo to `~/.config/`
-- Ask if you want the **AI Development Bundle** (optional)
-- Preserve your original files
-
-**AI Development Bundle** (optional):
-- During setup, you'll be asked if you want AI/ML development tools
-- Adds 18 packages: CUDA, Jupyter, conda, ML libraries (~5GB)
-- Includes convenient aliases: `ai-env`, `jupyter-ai`, `gpu-monitor`
-- 📖 See [AI_DEV_BUNDLE.md](AI_DEV_BUNDLE.md) for complete details
-
-#### 4. Install packages (optional)
-
-```bash
-./scripts/install-packages.sh
-```
+### What Gets Installed
 
 **Package counts:**
 - Core packages: 40 (containers, editors, tools, etc.)
-- AI-dev packages: 18 (if enabled during setup)
-- Base Omarchy: 161 (already installed)
+- AI-dev packages: 18 (if you enable the AI Development Bundle)
+- Base Omarchy: 161 (already installed in base system)
 
-The script offers interactive selection mode to choose specific packages.
+**AI Development Bundle** (optional):
+- During installation, you'll be asked if you want AI/ML development tools
+- Adds: CUDA, Jupyter, conda, ML libraries (~5GB)
+- Includes convenient aliases: `ai-env`, `jupyter-ai`, `gpu-monitor`
+- 📖 See [AI_DEV_BUNDLE.md](AI_DEV_BUNDLE.md) for complete details
 
-#### 5. Log out and log back in
+### Advanced: Manual Step-by-Step
 
-Restart your session to apply all changes.
+If you prefer to run individual scripts manually, see [QUICKSTART.md](QUICKSTART.md) for step-by-step instructions.
+
+**Note:** The old `./scripts/setup.sh` workflow is still available for advanced users who need granular control, but most users should use the unified `./install.sh`.
 
 ## Package Management
 
