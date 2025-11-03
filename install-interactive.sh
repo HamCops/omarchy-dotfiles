@@ -3,7 +3,8 @@
 # Omarchy Dotfiles - Interactive Installation Wrapper
 # This script runs the Python TUI, then executes the installation
 
-set -e
+# Note: We don't use 'set -e' because package installation may have
+# non-fatal failures that we want to handle gracefully
 
 DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BACKUP_DIR="$HOME/.dotfiles-backup-$(date +%Y%m%d-%H%M%S)"
@@ -240,7 +241,8 @@ else
             ((SKIPPED++))
         else
             echo -e "${BLUE}[INSTALL]${NC} $package..."
-            if yay -S --noconfirm "$package" 2>/dev/null; then
+            # Capture exit code without stopping script
+            if yay -S --noconfirm "$package" 2>&1; then
                 echo -e "${GREEN}[✓]${NC} $package"
                 ((INSTALLED++))
             else
@@ -263,7 +265,8 @@ else
                 ((SKIPPED++))
             else
                 echo -e "${BLUE}[INSTALL]${NC} $package..."
-                if yay -S --noconfirm "$package" 2>/dev/null; then
+                # Capture exit code without stopping script
+                if yay -S --noconfirm "$package" 2>&1; then
                     echo -e "${GREEN}[✓]${NC} $package"
                     ((INSTALLED++))
                 else
