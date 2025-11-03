@@ -38,27 +38,45 @@ echo ""
 info "Adjusting dotfiles for Lenovo T420s..."
 echo ""
 
-# 1. Adjust Waybar config - remove NVIDIA GPU widgets
-adjust "Removing NVIDIA GPU widgets from Waybar..."
-WAYBAR_CONFIG="$DOTFILES_DIR/.config/waybar/config.jsonc"
-
-if [ -f "$WAYBAR_CONFIG" ]; then
-    # Create backup
-    cp "$WAYBAR_CONFIG" "$WAYBAR_CONFIG.surface-backup"
-
-    # Remove GPU temp widget
-    sed -i '/"custom\/gpu-temp"/,/},/d' "$WAYBAR_CONFIG"
-
-    # Remove GPU VRAM widget
-    sed -i '/"custom\/gpu-vram"/,/},/d' "$WAYBAR_CONFIG"
-
-    # Remove from modules-right array
-    sed -i 's/"custom\/gpu-temp",//g' "$WAYBAR_CONFIG"
-    sed -i 's/"custom\/gpu-vram",//g' "$WAYBAR_CONFIG"
-
-    info "✓ Waybar config adjusted"
+# Run hardware detection first
+if [ -f "$DOTFILES_DIR/scripts/detect-hardware.sh" ]; then
+    info "Detecting T420s hardware configuration..."
+    "$DOTFILES_DIR/scripts/detect-hardware.sh" > /dev/null 2>&1
+    source /tmp/hardware-profile.env || true
 else
-    warn "Waybar config not found"
+    warn "Hardware detection not available"
+    HAS_NVIDIA=false
+    RAM_GB=8
+fi
+
+info "Detected: RAM=${RAM_GB}GB, NVIDIA GPU=$HAS_NVIDIA"
+echo ""
+
+# 1. Adjust Waybar config - remove NVIDIA GPU widgets ONLY if no NVIDIA
+if [ "$HAS_NVIDIA" = false ]; then
+    adjust "Removing NVIDIA GPU widgets from Waybar (no NVIDIA GPU detected)..."
+    WAYBAR_CONFIG="$DOTFILES_DIR/.config/waybar/config.jsonc"
+
+    if [ -f "$WAYBAR_CONFIG" ]; then
+        # Create backup
+        cp "$WAYBAR_CONFIG" "$WAYBAR_CONFIG.surface-backup"
+
+        # Remove GPU temp widget
+        sed -i '/"custom\/gpu-temp"/,/},/d' "$WAYBAR_CONFIG"
+
+        # Remove GPU VRAM widget
+        sed -i '/"custom\/gpu-vram"/,/},/d' "$WAYBAR_CONFIG"
+
+        # Remove from modules-right array
+        sed -i 's/"custom\/gpu-temp",//g' "$WAYBAR_CONFIG"
+        sed -i 's/"custom\/gpu-vram",//g' "$WAYBAR_CONFIG"
+
+        info "✓ Waybar config adjusted"
+    else
+        warn "Waybar config not found"
+    fi
+else
+    info "Keeping NVIDIA GPU widgets (NVIDIA GPU detected: $NVIDIA_DRIVER needed)"
 fi
 
 # 2. Adjust hypridle timeouts for better battery life
@@ -111,20 +129,22 @@ else
     warn "monitors.conf not found"
 fi
 
-# 4. Adjust environment variables for Intel GPU
-adjust "Setting Intel GPU environment variables..."
+# 4. Adjust environment variables based on GPU
 ENVS_CONFIG="$DOTFILES_DIR/.config/hypr/envs.conf"
 
 if [ -f "$ENVS_CONFIG" ]; then
     cp "$ENVS_CONFIG" "$ENVS_CONFIG.surface-backup"
 
-    # Remove NVIDIA-specific variables
-    sed -i '/LIBVA_DRIVER_NAME,nvidia/d' "$ENVS_CONFIG"
-    sed -i '/__GLX_VENDOR_LIBRARY_NAME,nvidia/d' "$ENVS_CONFIG"
-    sed -i '/WLR_DRM_DEVICES.*card1/d' "$ENVS_CONFIG"
+    if [ "$HAS_NVIDIA" = false ]; then
+        adjust "Setting Intel GPU environment variables..."
 
-    # Add Intel-specific variables
-    cat >> "$ENVS_CONFIG" << 'EOF'
+        # Remove NVIDIA-specific variables
+        sed -i '/LIBVA_DRIVER_NAME,nvidia/d' "$ENVS_CONFIG"
+        sed -i '/__GLX_VENDOR_LIBRARY_NAME,nvidia/d' "$ENVS_CONFIG"
+        sed -i '/WLR_DRM_DEVICES.*card1/d' "$ENVS_CONFIG"
+
+        # Add Intel-specific variables
+        cat >> "$ENVS_CONFIG" << 'EOF'
 
 # Intel GPU settings (T420s)
 env = LIBVA_DRIVER_NAME,i965
@@ -133,7 +153,11 @@ env = GDK_SCALE,1
 env = QT_QPA_PLATFORM,wayland
 EOF
 
-    info "✓ Environment variables set for Intel GPU"
+        info "✓ Environment variables set for Intel GPU"
+    else
+        info "Keeping NVIDIA environment variables (NVIDIA GPU detected)"
+        warn "Note: T420s with NVIDIA NVS 4200M needs nvidia-390xx-dkms (legacy driver)"
+    fi
 else
     warn "envs.conf not found"
 fi
@@ -144,17 +168,37 @@ PACKAGES_FILE="$DOTFILES_DIR/packages.txt"
 T420S_PACKAGES="$DOTFILES_DIR/hardware/t420s/packages-t420s.txt"
 
 if [ -f "$PACKAGES_FILE" ]; then
-    # Filter out Surface/NVIDIA-specific packages
-    grep -v -E "nvidia-open-dkms|nvidia-utils|lib32-nvidia-utils|nvidia-container-toolkit|cuda|cudnn|iptsd|python-pycuda|python-cupy" "$PACKAGES_FILE" > "$T420S_PACKAGES"
+    if [ "$HAS_NVIDIA" = false ]; then
+        # Filter out Surface and NVIDIA packages (Intel-only T420s)
+        info "Filtering for Intel-only configuration..."
+        grep -v -E "nvidia-open-dkms|nvidia-utils|lib32-nvidia-utils|nvidia-container-toolkit|cuda|cudnn|iptsd|python-pycuda|python-cupy|libva-nvidia-driver|linux-surface|linux-surface-headers" "$PACKAGES_FILE" > "$T420S_PACKAGES"
 
-    # Add T420s-specific packages
-    cat >> "$T420S_PACKAGES" << 'EOF'
+        # Add Intel-specific packages
+        cat >> "$T420S_PACKAGES" << 'EOF'
 mesa
 vulkan-intel
 xf86-video-intel
 tlp
 thermald
 EOF
+    else
+        # Keep NVIDIA but filter out modern NVIDIA drivers and Surface stuff
+        info "Filtering for T420s with NVIDIA NVS 4200M..."
+        grep -v -E "nvidia-open-dkms|cuda|cudnn|iptsd|python-pycuda|python-cupy|linux-surface|linux-surface-headers" "$PACKAGES_FILE" > "$T420S_PACKAGES"
+
+        # Replace modern NVIDIA with legacy and add T420s packages
+        sed -i 's/nvidia-utils/nvidia-390xx-utils/g' "$T420S_PACKAGES"
+        sed -i 's/lib32-nvidia-utils/lib32-nvidia-390xx-utils/g' "$T420S_PACKAGES"
+
+        # Add legacy NVIDIA driver and T420s packages
+        cat >> "$T420S_PACKAGES" << 'EOF'
+nvidia-390xx-dkms
+mesa
+vulkan-intel
+tlp
+thermald
+EOF
+    fi
 
     info "✓ T420s package list created at hardware/t420s/packages-t420s.txt"
 else
