@@ -55,26 +55,40 @@ fi
 
 # Check for python-dialog (pythondialog)
 if ! python3 -c "import dialog" 2>/dev/null; then
-    warn "pythondialog is not installed"
-    info "Installing pythondialog via pip..."
+    warn "python-pythondialog is not installed"
 
-    # Ensure pip is available
-    if ! command -v pip &> /dev/null && ! command -v pip3 &> /dev/null; then
-        info "Installing python-pip..."
-        sudo pacman -S --noconfirm python-pip || {
-            error "Failed to install python-pip"
+    # Check if yay is available for AUR
+    if command -v yay &> /dev/null; then
+        info "Installing python-pythondialog from AUR..."
+        yay -S --noconfirm python-pythondialog || {
+            error "Failed to install python-pythondialog from AUR"
+            error "Try manually: yay -S python-pythondialog"
             exit 2
         }
+        success "python-pythondialog installed successfully"
+    else
+        # Fallback to pipx if yay not available
+        warn "yay not found, attempting pipx installation..."
+
+        if ! command -v pipx &> /dev/null; then
+            info "Installing pipx..."
+            sudo pacman -S --noconfirm python-pipx || {
+                error "Failed to install pipx"
+                exit 2
+            }
+        fi
+
+        info "Installing pythondialog via pipx..."
+        pipx install pythondialog || {
+            error "Failed to install pythondialog"
+            error "Please install yay and run: yay -S python-pythondialog"
+            exit 2
+        }
+        success "pythondialog installed via pipx"
+
+        # Add pipx bin to PATH for this session
+        export PATH="$HOME/.local/bin:$PATH"
     fi
-
-    # Install pythondialog
-    pip install --user pythondialog || {
-        error "Failed to install pythondialog"
-        error "Try manually: pip install --user pythondialog"
-        exit 2
-    }
-
-    success "pythondialog installed successfully"
 fi
 
 # Run the TUI

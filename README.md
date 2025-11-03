@@ -99,12 +99,12 @@ See [hardware/HARDWARE_DIFFERENCES.md](hardware/HARDWARE_DIFFERENCES.md) for det
 
 **Note:** The interactive installer will automatically install required dependencies if missing:
 - `dialog` (from core repos)
-- `pythondialog` (via pip)
+- `python-pythondialog` (from AUR via yay)
 
 For manual installation:
 ```bash
-sudo pacman -S dialog python-pip
-pip install --user pythondialog
+sudo pacman -S dialog
+yay -S python-pythondialog
 ```
 
 ### Installation Options
