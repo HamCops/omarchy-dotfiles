@@ -1,0 +1,19 @@
+# See https://wiki.hyprland.org/Configuring/Monitors/
+# List current monitors and resolutions possible: hyprctl monitors
+# Format: monitor = [port], resolution, position, scale
+
+# Optimized for Sharp 2400x1600@120Hz (14" 2.4K display)
+# Alternative: 2x scaling for larger text
+# env = GDK_SCALE,2
+# monitor = eDP-1, 2400x1600@120, auto, 2
+
+# Smaller UI with 1.6x scaling - more screen real estate
+env = GDK_SCALE,1.6
+monitor = eDP-1, 2400x1600@120, auto, 1.6
+
+# Alternative: If you want maximum screen real estate (smaller text)
+# env = GDK_SCALE,1
+# monitor = eDP-1, 2400x1600@120, auto, 1
+
+# Fallback for any other monitors (external displays)
+monitor = , preferred, auto, auto

@@ -1,0 +1,27 @@
+# Backup files
+*.backup
+*.bak
+*.backup-*
+
+# Git subdirectories in themes (handle separately if needed)
+.config/omarchy/themes/*/.git
+
+# Temporary files
+*~
+*.swp
+*.swo
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Personal/sensitive data
+*.key
+*.pem
+*_rsa
+*_dsa
+credentials.json
+secrets.*
+
+# Logs
+*.log
