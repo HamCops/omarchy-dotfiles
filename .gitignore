@@ -30,4 +30,7 @@ secrets.*
 package-selection.txt
 docker/mcp-selection.env
 docker/docker-compose.custom.yml
+
+# AI-dev configuration (user preference)
+.config/omarchy-dotfiles.conf
 packages-full-original.txt

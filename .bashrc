@@ -1,50 +1,18 @@
 source ~/.local/share/omarchy/default/bash/rc
 
-# >>> conda initialize >>>
-# !! Contents within this block are managed by 'conda init' !!
-__conda_setup="$('/home/cam/miniconda3/bin/conda' 'shell.bash' 'hook' 2> /dev/null)"
-if [ $? -eq 0 ]; then
-    eval "$__conda_setup"
-else
-    if [ -f "/home/cam/miniconda3/etc/profile.d/conda.sh" ]; then
-        . "/home/cam/miniconda3/etc/profile.d/conda.sh"
-    else
-        export PATH="/home/cam/miniconda3/bin:$PATH"
-    fi
-fi
-unset __conda_setup
-# <<< conda initialize <<<
-
-# ===== Omarchy AI Development Environment =====
-# Set OpenSSL workaround
-export CRYPTOGRAPHY_OPENSSL_NO_LEGACY=1
-
-# Core aliases
-alias ai-env='conda activate ai-dev'
-alias ai-deactivate='conda deactivate'
-
-# Navigation
-alias ai-workspace='cd ~/ai-workspace'
-alias ai-projects='cd ~/ai-workspace/projects'
-alias ai-notebooks='cd ~/ai-workspace/notebooks'
-alias ai-models='cd ~/ai-workspace/models'
-
-# Tools
-alias jupyter-ai='cd ~/ai-workspace && jupyter lab'
-alias mlflow-ui='cd ~/ai-workspace/experiments && mlflow ui'
-alias tensorboard-ai='cd ~/ai-workspace/logs && tensorboard --logdir .'
-alias gpu-monitor='watch -n 1 nvidia-smi'
-alias ai-doctor='conda activate ai-dev && ~/ai-workspace/tools/ai-doctor.sh'
-
-# CI/CD
-alias ai-init='~/ai-workspace/tools/init-ai-project.sh'
-alias ai-test='cd ~/ai-workspace && make test'
-alias ai-lint='cd ~/ai-workspace && make lint'
-alias ai-format='cd ~/ai-workspace && make format'
-alias ai-security='cd ~/ai-workspace && make security'
-
 # Created by `pipx` on 2025-10-25 20:37:42
 export PATH="$PATH:/home/cam/.local/bin"
+
+# ===== AI Development Environment (Optional) =====
+# To enable AI development tools, uncomment the line below or run:
+# echo "AI_DEV_ENABLED=true" > ~/.config/omarchy-dotfiles.conf
+if [ -f ~/.config/omarchy-dotfiles.conf ]; then
+    source ~/.config/omarchy-dotfiles.conf
+fi
+
+if [ "$AI_DEV_ENABLED" = "true" ] && [ -f ~/.bashrc-ai-dev ]; then
+    source ~/.bashrc-ai-dev
+fi
 
 # ===== MCP Bridge Management =====
 # Manual start function for ollama-mcp-bridge

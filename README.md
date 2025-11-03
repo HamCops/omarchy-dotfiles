@@ -34,11 +34,14 @@ omarchy-dotfiles/
 ├── scripts/
 │   ├── local-bin/     # Custom scripts (monitor-switch, etc.)
 │   └── *.sh           # Setup and deployment scripts
-├── packages.txt       # Additional packages beyond base Omarchy (58 packages)
+├── packages.txt       # Core additional packages (40 packages)
+├── packages-ai-dev.txt  # Optional AI/ML development packages (18 packages)
 ├── omarchy-base-packages.txt  # Reference: base Omarchy packages (161 packages)
 ├── .bashrc            # Bash configuration with aliases and MCP functions
+├── .bashrc-ai-dev     # Optional AI development aliases (conda, jupyter, etc.)
 ├── THEME_AND_KEYBINDINGS.md   # Theme and keybinding documentation
 ├── MCP_GATEWAY_SETUP.md       # MCP bridge/gateway documentation
+├── AI_DEV_BUNDLE.md           # Optional AI/ML development bundle documentation
 └── README.md          # This file
 ```
 
@@ -110,7 +113,14 @@ nano packages.txt
 This will:
 - Backup your existing configs to `~/.dotfiles-backup-<timestamp>`
 - Create symlinks from this repo to `~/.config/`
+- Ask if you want the **AI Development Bundle** (optional)
 - Preserve your original files
+
+**AI Development Bundle** (optional):
+- During setup, you'll be asked if you want AI/ML development tools
+- Adds 18 packages: CUDA, Jupyter, conda, ML libraries (~5GB)
+- Includes convenient aliases: `ai-env`, `jupyter-ai`, `gpu-monitor`
+- 📖 See [AI_DEV_BUNDLE.md](AI_DEV_BUNDLE.md) for complete details
 
 #### 4. Install packages (optional)
 
@@ -118,7 +128,12 @@ This will:
 ./scripts/install-packages.sh
 ```
 
-**Note:** This installs 58 additional packages beyond base Omarchy (which already includes 161 packages). The script offers interactive selection mode to choose which packages to install.
+**Package counts:**
+- Core packages: 40 (containers, editors, tools, etc.)
+- AI-dev packages: 18 (if enabled during setup)
+- Base Omarchy: 161 (already installed)
+
+The script offers interactive selection mode to choose specific packages.
 
 #### 5. Log out and log back in
 
@@ -189,11 +204,15 @@ See `scripts/local-bin/monitor-switch` for details.
 
 ### Bash Aliases and Functions
 
-**Location:** `.bashrc`
+**Location:** `.bashrc` and `.bashrc-ai-dev` (optional)
 
 The repository includes a comprehensive `.bashrc` with:
 
-#### AI Development Aliases
+#### AI Development Aliases (Optional)
+
+**Note:** These aliases are only available if you enable the AI Development Bundle during setup.
+
+**Location:** `.bashrc-ai-dev`
 
 ```bash
 ai-env              # Activate conda ai-dev environment
@@ -201,7 +220,10 @@ ai-workspace        # cd ~/ai-workspace
 ai-projects         # cd ~/ai-workspace/projects
 jupyter-ai          # Launch Jupyter Lab
 gpu-monitor         # Watch nvidia-smi
+# ... and 10+ more AI development aliases
 ```
+
+📖 **See [AI_DEV_BUNDLE.md](AI_DEV_BUNDLE.md) for complete AI-dev documentation**
 
 #### MCP Bridge Management
 

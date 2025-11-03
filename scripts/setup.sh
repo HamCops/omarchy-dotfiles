@@ -130,6 +130,48 @@ if [ -d "$BACKUP_DIR" ]; then
 fi
 
 echo ""
+
+# Ask about AI Development environment
+echo "======================================"
+echo "  Optional: AI Development Bundle"
+echo "======================================"
+echo ""
+echo "The AI Development bundle includes:"
+echo "  • Conda (miniconda3) for environment management"
+echo "  • CUDA, cuDNN for GPU acceleration"
+echo "  • Jupyter Notebook for interactive development"
+echo "  • Python ML libraries (numpy, pandas, matplotlib, scipy, scikit-learn, etc.)"
+echo "  • AI development aliases (ai-env, ai-workspace, jupyter-ai, etc.)"
+echo ""
+echo "This bundle adds ~18 packages and requires ~5GB disk space."
+echo ""
+
+read -p "Enable AI Development bundle? (y/N) " -n 1 -r
+echo
+if [[ $REPLY =~ ^[Yy]$ ]]; then
+    info "Enabling AI Development environment..."
+
+    # Create config file to enable AI-dev
+    mkdir -p "$HOME/.config"
+    echo "AI_DEV_ENABLED=true" > "$HOME/.config/omarchy-dotfiles.conf"
+
+    # Link AI-dev bashrc
+    create_symlink "$DOTFILES_DIR/.bashrc-ai-dev" "$HOME/.bashrc-ai-dev"
+
+    info "✓ AI Development environment enabled"
+    echo ""
+    echo "AI-dev will be loaded on next shell session."
+    echo "To load now: source ~/.bashrc"
+    echo ""
+else
+    info "Skipping AI Development bundle"
+    echo "You can enable it later by running:"
+    echo "  echo 'AI_DEV_ENABLED=true' > ~/.config/omarchy-dotfiles.conf"
+    echo "  ln -sf $DOTFILES_DIR/.bashrc-ai-dev ~/.bashrc-ai-dev"
+    echo ""
+fi
+
+echo ""
 echo "======================================"
 echo "  Next Steps"
 echo "======================================"
@@ -202,12 +244,39 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
 
     echo ""
     info "Automated setup complete!"
+
+    # System update
+    echo ""
+    read -p "Update Omarchy system packages? (y/N) " -n 1 -r
+    echo
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+        info "Updating system..."
+        sudo pacman -Syu --noconfirm
+        info "✓ System updated"
+    else
+        info "Skipping system update"
+    fi
+
 else
     info "You can run the scripts manually when ready"
 fi
 
+# Offer to reboot
 echo ""
 echo "======================================"
-info "Setup finished! Enjoy your dotfiles!"
-echo "======================================"
+read -p "Reboot system to apply all changes? (y/N) " -n 1 -r
+echo
+if [[ $REPLY =~ ^[Yy]$ ]]; then
+    info "Rebooting in 5 seconds... (Ctrl+C to cancel)"
+    sleep 5
+    sudo reboot
+else
+    echo ""
+    echo "======================================"
+    info "Setup finished! Enjoy your dotfiles!"
+    echo "======================================"
+    echo ""
+    warn "Remember to restart Hyprland or log out/in to apply changes"
+    echo ""
+fi
 echo ""

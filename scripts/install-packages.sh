@@ -119,9 +119,28 @@ if [ ! -f "$PACKAGES_FILE" ]; then
     exit 1
 fi
 
+# Check if AI Development bundle is enabled
+AI_DEV_ENABLED=false
+if [ -f "$HOME/.config/omarchy-dotfiles.conf" ]; then
+    source "$HOME/.config/omarchy-dotfiles.conf"
+fi
+
+# Create temporary combined package list if AI-dev is enabled
+if [ "$AI_DEV_ENABLED" = "true" ] && [ -f "$DOTFILES_DIR/packages-ai-dev.txt" ]; then
+    info "AI Development bundle is enabled"
+    TEMP_PACKAGES="$(mktemp)"
+    cat "$PACKAGES_FILE" > "$TEMP_PACKAGES"
+    cat "$DOTFILES_DIR/packages-ai-dev.txt" >> "$TEMP_PACKAGES"
+    PACKAGES_FILE="$TEMP_PACKAGES"
+    AI_DEV_TEMP_FILE="$TEMP_PACKAGES"
+fi
+
 # Count packages
 TOTAL_PACKAGES=$(wc -l < "$PACKAGES_FILE")
 info "Found $TOTAL_PACKAGES packages to install"
+if [ "$AI_DEV_ENABLED" = "true" ]; then
+    info "  (Includes 18 AI/ML development packages)"
+fi
 echo ""
 
 # Show hardware-specific warnings
@@ -222,6 +241,11 @@ if [ "$HARDWARE_PROFILE" = "t420s" ]; then
     if [ "$HAS_NVIDIA" = true ]; then
         echo "  - Configure NVIDIA Optimus if you have discrete GPU"
     fi
+fi
+
+# Clean up temporary file if created
+if [ -n "$AI_DEV_TEMP_FILE" ] && [ -f "$AI_DEV_TEMP_FILE" ]; then
+    rm "$AI_DEV_TEMP_FILE"
 fi
 
 echo ""
