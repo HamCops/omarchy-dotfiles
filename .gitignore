@@ -25,3 +25,8 @@ secrets.*
 
 # Logs
 *.log
+
+# User selections (local only, not shared)
+package-selection.txt
+docker/mcp-selection.env
+docker/docker-compose.custom.yml

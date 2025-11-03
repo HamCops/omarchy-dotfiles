@@ -1,12 +1,28 @@
 #!/bin/bash
 
 # Package Installation Script for Omarchy Dotfiles
-# Installs packages with hardware detection
+# Installs packages with hardware detection and optional interactive selection
 
 set -e
 
 DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 PACKAGES_FILE="$DOTFILES_DIR/packages.txt"
+SELECTION_FILE="$DOTFILES_DIR/package-selection.txt"
+
+# Parse arguments
+USE_SELECTION=false
+INTERACTIVE=false
+
+for arg in "$@"; do
+    case $arg in
+        --use-selection)
+            USE_SELECTION=true
+            ;;
+        --interactive|-i)
+            INTERACTIVE=true
+            ;;
+    esac
+done
 
 # Colors
 GREEN='\033[0;32m'
@@ -32,6 +48,16 @@ echo "  Package Installation"
 echo "======================================"
 echo ""
 
+# Launch interactive selector if requested
+if [ "$INTERACTIVE" = true ]; then
+    if [ -f "$DOTFILES_DIR/scripts/select-packages.sh" ]; then
+        "$DOTFILES_DIR/scripts/select-packages.sh"
+        exit $?
+    else
+        warn "Package selector not found. Proceeding with default installation."
+    fi
+fi
+
 # Run hardware detection
 if [ -f "$DOTFILES_DIR/scripts/detect-hardware.sh" ]; then
     info "Detecting hardware..."
@@ -42,14 +68,49 @@ else
     HARDWARE_PROFILE="generic"
 fi
 
-# Determine which package list to use
-if [ "$HARDWARE_PROFILE" = "t420s" ]; then
-    T420S_PACKAGES="$DOTFILES_DIR/hardware/t420s/packages-t420s.txt"
-    if [ -f "$T420S_PACKAGES" ]; then
-        info "Using T420s-specific package list"
-        PACKAGES_FILE="$T420S_PACKAGES"
-    else
-        warn "T420s package list not found. Using default (may include incompatible packages)"
+# Check if using custom selection
+if [ "$USE_SELECTION" = true ] && [ -f "$SELECTION_FILE" ]; then
+    info "Using custom package selection"
+    PACKAGES_FILE="$SELECTION_FILE"
+# Check if selection file exists (from previous run)
+elif [ ! "$USE_SELECTION" = true ] && [ -f "$SELECTION_FILE" ]; then
+    warn "Found existing package selection file"
+    read -p "Use previous package selection? (y/N) " -n 1 -r
+    echo
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+        PACKAGES_FILE="$SELECTION_FILE"
+    fi
+fi
+
+# Ask about interactive selection if not already set
+if [ "$PACKAGES_FILE" = "$DOTFILES_DIR/packages.txt" ] && [ "$USE_SELECTION" = false ]; then
+    echo ""
+    echo "Package installation options:"
+    echo "  1. Install all packages (default) - 219 packages"
+    echo "  2. Interactive selection (choose which packages)"
+    echo ""
+    read -p "Choose option (1/2) [1]: " pkg_option
+
+    if [ "$pkg_option" = "2" ]; then
+        if [ -f "$DOTFILES_DIR/scripts/select-packages.sh" ]; then
+            "$DOTFILES_DIR/scripts/select-packages.sh"
+            exit $?
+        else
+            warn "Package selector not found. Installing all packages."
+        fi
+    fi
+fi
+
+# Determine which package list to use (hardware-specific)
+if [ "$PACKAGES_FILE" = "$DOTFILES_DIR/packages.txt" ]; then
+    if [ "$HARDWARE_PROFILE" = "t420s" ]; then
+        T420S_PACKAGES="$DOTFILES_DIR/hardware/t420s/packages-t420s.txt"
+        if [ -f "$T420S_PACKAGES" ]; then
+            info "Using T420s-specific package list"
+            PACKAGES_FILE="$T420S_PACKAGES"
+        else
+            warn "T420s package list not found. Using default (may include incompatible packages)"
+        fi
     fi
 fi
 
