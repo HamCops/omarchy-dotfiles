@@ -4,13 +4,26 @@ My personal Omarchy (Arch Linux) configuration for Hyprland, optimized for Micro
 
 ---
 
-## 🚀 **NEW: Unified One-Command Installer**
+## 🚀 **NEW: Interactive TUI Installer**
 
 ```bash
-./install.sh
+./install-interactive.sh
 ```
 
-**Everything is now automated!** No more juggling multiple scripts. Just run `./install.sh` and it handles hardware detection, config adjustments, package installation, Docker deployment, and system setup automatically.
+**Professional terminal UI installer!** Interactive package and container selection with:
+- ✨ Beautiful dialog-based interface (like Arch installer)
+- 🔍 Automatic hardware detection
+- 📦 Multi-select package chooser with categories
+- 🐳 Container selection with resource info
+- 🎯 Three modes: Full Auto, Custom, Manual Step-by-Step
+- 💾 Automatic backups and progress tracking
+
+**Or use the non-interactive installer:**
+```bash
+./install.sh  # Fully automated, no prompts
+```
+
+📖 See [QUICK-START-TUI.md](QUICK-START-TUI.md) for TUI features and screenshots
 
 ---
 
@@ -84,7 +97,14 @@ See [hardware/HARDWARE_DIFFERENCES.md](hardware/HARDWARE_DIFFERENCES.md) for det
 3. Git installed: `sudo pacman -S git`
 4. (Optional) yay AUR helper: `sudo pacman -S yay`
 
-### Installation - ONE COMMAND!
+**Note:** The interactive installer will automatically install `python-dialog` if missing. For manual installation:
+```bash
+sudo pacman -S python-dialog
+```
+
+### Installation Options
+
+#### Option 1: Interactive TUI (Recommended)
 
 ```bash
 # Clone the repository
@@ -92,11 +112,25 @@ cd ~/Projects  # or your preferred location
 git clone https://github.com/YOUR_USERNAME/omarchy-dotfiles.git
 cd omarchy-dotfiles
 
-# Run the unified installer
+# Run the interactive installer
+./install-interactive.sh
+```
+
+Features:
+- 🎨 Beautiful terminal UI with checkboxes and menus
+- 📦 Select exactly which packages you want
+- 🐳 Choose which Docker containers to deploy
+- 🔍 Hardware-aware filtering (hides incompatible options)
+- 📊 Disk space and time estimates
+- 3 modes: Full Auto, Custom, Manual
+
+#### Option 2: Fully Automated (No Interaction)
+
+```bash
 ./install.sh
 ```
 
-**That's it!** The unified installer handles EVERYTHING:
+**The automated installer handles EVERYTHING:
 - ✅ Detects your hardware (Surface, T420s, or generic)
 - ✅ Runs hardware-specific adjustments automatically
 - ✅ Backs up existing configs to `~/.dotfiles-backup-<timestamp>`

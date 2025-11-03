@@ -2,7 +2,25 @@
 
 ## Fresh Installation (T420s or any new machine)
 
-### One-Command Setup
+### Interactive TUI Setup (Recommended)
+
+```bash
+git clone https://github.com/YOUR_USERNAME/omarchy-dotfiles.git ~/Projects/omarchy-dotfiles
+cd ~/Projects/omarchy-dotfiles
+./install-interactive.sh
+```
+
+**Features:**
+- 🎨 Beautiful dialog-based interface
+- 📦 Select packages with checkboxes
+- 🐳 Choose Docker containers interactively
+- 🔍 Hardware-aware (hides incompatible options for T420s)
+- 📊 Shows disk space and time estimates
+- 3 installation modes: Full Auto, Custom, Manual
+
+📖 **See [QUICK-START-TUI.md](QUICK-START-TUI.md) for detailed TUI guide**
+
+### Fully Automated Setup (No Prompts)
 
 ```bash
 git clone https://github.com/YOUR_USERNAME/omarchy-dotfiles.git ~/Projects/omarchy-dotfiles
@@ -10,17 +28,7 @@ cd ~/Projects/omarchy-dotfiles
 ./install.sh
 ```
 
-That's it! The unified installer will:
-1. ✅ Detect your hardware (Surface, T420s, or generic)
-2. ✅ Run hardware-specific adjustments automatically
-3. ✅ Backup your existing configs
-4. ✅ Link dotfiles to ~/.config/
-5. ✅ Install ALL packages automatically
-6. ✅ Deploy Docker & MCP containers automatically
-7. ✅ Update system packages
-8. ✅ Configure services (TLP, thermald, etc.)
-
-**No more juggling multiple scripts!** Everything runs in one go.
+Installs everything automatically without interaction.
 
 ### What Happens on T420s
 
