@@ -43,14 +43,38 @@ if ! command -v python3 &> /dev/null; then
     exit 2
 fi
 
-# Check for dialog
-if ! python3 -c "import dialog" 2>/dev/null; then
-    error "python-dialog is not installed"
-    info "Installing python-dialog..."
-    sudo pacman -S --noconfirm python-dialog || {
-        error "Failed to install python-dialog"
+# Check for dialog backend
+if ! command -v dialog &> /dev/null; then
+    warn "dialog is not installed"
+    info "Installing dialog..."
+    sudo pacman -S --noconfirm dialog || {
+        error "Failed to install dialog"
         exit 2
     }
+fi
+
+# Check for python-dialog (pythondialog)
+if ! python3 -c "import dialog" 2>/dev/null; then
+    warn "pythondialog is not installed"
+    info "Installing pythondialog via pip..."
+
+    # Ensure pip is available
+    if ! command -v pip &> /dev/null && ! command -v pip3 &> /dev/null; then
+        info "Installing python-pip..."
+        sudo pacman -S --noconfirm python-pip || {
+            error "Failed to install python-pip"
+            exit 2
+        }
+    fi
+
+    # Install pythondialog
+    pip install --user pythondialog || {
+        error "Failed to install pythondialog"
+        error "Try manually: pip install --user pythondialog"
+        exit 2
+    }
+
+    success "pythondialog installed successfully"
 fi
 
 # Run the TUI

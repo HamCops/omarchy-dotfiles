@@ -97,9 +97,14 @@ See [hardware/HARDWARE_DIFFERENCES.md](hardware/HARDWARE_DIFFERENCES.md) for det
 3. Git installed: `sudo pacman -S git`
 4. (Optional) yay AUR helper: `sudo pacman -S yay`
 
-**Note:** The interactive installer will automatically install `python-dialog` if missing. For manual installation:
+**Note:** The interactive installer will automatically install required dependencies if missing:
+- `dialog` (from core repos)
+- `pythondialog` (via pip)
+
+For manual installation:
 ```bash
-sudo pacman -S python-dialog
+sudo pacman -S dialog python-pip
+pip install --user pythondialog
 ```
 
 ### Installation Options
