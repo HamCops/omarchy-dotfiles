@@ -38,3 +38,6 @@ swaks 20240103.0-3
 tailscale 1.90.6-1
 wttrbar 0.13.0-1
 zed 0.210.4-1
+networkmanager
+network-manager-applet
+nm-connection-editor

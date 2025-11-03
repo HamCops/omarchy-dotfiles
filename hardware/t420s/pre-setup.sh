@@ -110,18 +110,25 @@ if [ -f "$MONITORS_CONFIG" ]; then
 
     cat > "$MONITORS_CONFIG" << 'EOF'
 # T420s Monitor Configuration
-# Native resolution: 1600x900 or 1366x768
+# See https://wiki.hyprland.org/Configuring/Monitors/
 
-# Detect and use preferred resolution
+# T420s uses LVDS-1 for built-in display (not eDP-1)
+# Native resolutions: 1600x900 or 1366x768
+
+# Built-in display (auto-detect resolution)
+monitor=LVDS-1,preferred,auto,1
+
+# External monitors (auto-detect when connected)
+monitor=HDMI-1,preferred,auto,1
+monitor=VGA-1,preferred,auto,1
+monitor=DP-1,preferred,auto,1
+
+# Fallback for any other monitors
 monitor=,preferred,auto,1
 
-# If you have specific monitor, uncomment and adjust:
+# Uncomment if you need to force specific resolution:
 # monitor=LVDS-1,1600x900@60,0x0,1    # For 1600x900 panel
 # monitor=LVDS-1,1366x768@60,0x0,1    # For 1366x768 panel
-
-# External monitor (auto-detect)
-monitor=HDMI-A-1,preferred,auto,1
-monitor=VGA-1,preferred,auto,1
 EOF
 
     info "✓ Monitor config created for T420s"
