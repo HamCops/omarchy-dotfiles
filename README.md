@@ -28,7 +28,8 @@ omarchy-dotfiles/
 │   ├── surface/       # Surface-specific configs
 │   └── t420s/         # T420s-specific configs
 ├── docker/            # Docker/MCP container configs
-├── packages.txt       # List of installed packages (219 explicit)
+├── packages.txt       # Additional packages beyond base Omarchy (58 packages)
+├── omarchy-base-packages.txt  # Reference: base Omarchy packages (161 packages)
 └── README.md          # This file
 ```
 
@@ -77,12 +78,17 @@ Before running setup, review and adjust for your hardware:
 # Check hardware-specific notes
 cat hardware/HARDWARE_DIFFERENCES.md
 
-# For T420s, remove incompatible packages from packages.txt:
-# - nvidia-open-dkms (use nvidia-390xx-dkms if you have discrete GPU)
-# - cuda, cudnn (not supported on old GPUs)
-# - iptsd (no touch support)
+# Review additional packages to install
+# Note: packages.txt contains ONLY additional packages beyond base Omarchy
+# Base Omarchy packages (161) are already installed by default
+cat packages.txt
 
-# Edit packages.txt to remove unwanted packages:
+# For T420s, the hardware detection will automatically:
+# - Filter incompatible packages (cuda, cudnn, iptsd)
+# - Use nvidia-390xx-dkms for legacy GPU if present
+# - Skip Surface-specific packages
+
+# If you want to customize further:
 nano packages.txt
 ```
 
@@ -103,11 +109,44 @@ This will:
 ./scripts/install-packages.sh
 ```
 
-**Warning:** This will install 200+ packages. Review `packages.txt` first and remove packages you don't want.
+**Note:** This installs 58 additional packages beyond base Omarchy (which already includes 161 packages). The script offers interactive selection mode to choose which packages to install.
 
 #### 5. Log out and log back in
 
 Restart your session to apply all changes.
+
+## Package Management
+
+### Understanding the Package Lists
+
+This repository uses a **filtered package approach** to avoid redundancy:
+
+- **`omarchy-base-packages.txt`** (161 packages) - Reference list of packages included in base Omarchy installation
+  - These are already installed when you install Omarchy
+  - This file is for documentation purposes only
+
+- **`packages.txt`** (58 packages) - **Additional packages** you need to install
+  - Only contains packages beyond base Omarchy
+  - Includes development tools, AI/ML libraries, containers, etc.
+  - This is what `install-packages.sh` installs
+
+### Regenerating the Package List
+
+If you add more packages to your system and want to update `packages.txt`:
+
+```bash
+# Export currently installed packages
+pacman -Qe > packages-new.txt
+
+# Filter out base Omarchy packages
+python3 scripts/filter-base-packages.py
+
+# Review and replace
+mv packages.txt packages.txt.backup
+mv packages-additional.txt packages.txt
+```
+
+The filter script automatically excludes all base Omarchy packages, keeping only the additional ones you installed.
 
 ## Manual Setup
 

@@ -30,3 +30,4 @@ secrets.*
 package-selection.txt
 docker/mcp-selection.env
 docker/docker-compose.custom.yml
+packages-full-original.txt
