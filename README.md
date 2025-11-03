@@ -31,9 +31,14 @@ omarchy-dotfiles/
 │   ├── surface/       # Surface-specific configs
 │   └── t420s/         # T420s-specific configs
 ├── docker/            # Docker/MCP container configs
+├── scripts/
+│   ├── local-bin/     # Custom scripts (monitor-switch, etc.)
+│   └── *.sh           # Setup and deployment scripts
 ├── packages.txt       # Additional packages beyond base Omarchy (58 packages)
 ├── omarchy-base-packages.txt  # Reference: base Omarchy packages (161 packages)
+├── .bashrc            # Bash configuration with aliases and MCP functions
 ├── THEME_AND_KEYBINDINGS.md   # Theme and keybinding documentation
+├── MCP_GATEWAY_SETUP.md       # MCP bridge/gateway documentation
 └── README.md          # This file
 ```
 
@@ -151,6 +156,73 @@ mv packages-additional.txt packages.txt
 ```
 
 The filter script automatically excludes all base Omarchy packages, keeping only the additional ones you installed.
+
+## Custom Scripts and Aliases
+
+This repository includes custom bash scripts and aliases to enhance productivity.
+
+### Custom Scripts
+
+**Location:** `scripts/local-bin/`
+
+All scripts are automatically linked to `~/.local/bin/` by the setup script.
+
+#### monitor-switch
+
+Monitor configuration switcher for different setups:
+
+```bash
+# Switch to work setup (external monitors, laptop disabled)
+monitor-switch work
+
+# Switch to home setup (laptop only)
+monitor-switch home
+
+# Switch to TV setup (4K external display)
+monitor-switch tv
+
+# Check current configuration
+monitor-switch status
+```
+
+See `scripts/local-bin/monitor-switch` for details.
+
+### Bash Aliases and Functions
+
+**Location:** `.bashrc`
+
+The repository includes a comprehensive `.bashrc` with:
+
+#### AI Development Aliases
+
+```bash
+ai-env              # Activate conda ai-dev environment
+ai-workspace        # cd ~/ai-workspace
+ai-projects         # cd ~/ai-workspace/projects
+jupyter-ai          # Launch Jupyter Lab
+gpu-monitor         # Watch nvidia-smi
+```
+
+#### MCP Bridge Management
+
+```bash
+mcp-start           # Start ollama-mcp-bridge
+mcp-stop            # Stop the bridge
+mcp-restart         # Restart the bridge
+mcp-status          # Check if running
+mcp-log             # View real-time logs
+```
+
+📖 **See [MCP_GATEWAY_SETUP.md](MCP_GATEWAY_SETUP.md) for complete MCP bridge documentation**
+
+### Adding Custom Scripts
+
+To add your own scripts:
+
+1. Place scripts in `scripts/local-bin/`
+2. Make executable: `chmod +x scripts/local-bin/my-script`
+3. Run setup: `./scripts/setup.sh`
+4. Script will be symlinked to `~/.local/bin/my-script`
 
 ## Manual Setup
 

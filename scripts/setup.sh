@@ -106,6 +106,23 @@ create_symlink "$DOTFILES_DIR/.config/waybar" "$HOME/.config/waybar"
 info "Setting up Omarchy configurations..."
 create_symlink "$DOTFILES_DIR/.config/omarchy" "$HOME/.config/omarchy"
 
+# Link .bashrc (with aliases and MCP functions)
+info "Setting up .bashrc with custom aliases..."
+create_symlink "$DOTFILES_DIR/.bashrc" "$HOME/.bashrc"
+
+# Link custom scripts
+info "Setting up custom scripts..."
+mkdir -p "$HOME/.local/bin"
+if [ -d "$DOTFILES_DIR/scripts/local-bin" ]; then
+    for script in "$DOTFILES_DIR/scripts/local-bin"/*; do
+        if [ -f "$script" ]; then
+            script_name=$(basename "$script")
+            create_symlink "$script" "$HOME/.local/bin/$script_name"
+            chmod +x "$HOME/.local/bin/$script_name"
+        fi
+    done
+fi
+
 echo ""
 info "Dotfiles setup complete!"
 if [ -d "$BACKUP_DIR" ]; then

@@ -1,0 +1,110 @@
+#!/bin/bash
+# Monitor configuration switcher for Hyprland
+# Switches between work setup (external monitors) and home setup (laptop only)
+
+MONITOR_CONF="$HOME/.config/hypr/monitors.conf"
+
+# Check if config file exists
+if [ ! -f "$MONITOR_CONF" ]; then
+    echo "Error: monitors.conf not found at $MONITOR_CONF"
+    exit 1
+fi
+
+# Function to switch to work setup (external monitors, laptop disabled)
+work_setup() {
+    sed -i '
+        # Enable work setup section
+        s/^# monitor = eDP-1, disable/monitor = eDP-1, disable/
+        s/^# monitor = DP-2, 2560x1080@75, 0x420, 1/monitor = DP-2, 2560x1080@75, 0x420, 1/
+        s/^# monitor = DP-1, 2560x1080@75, 2560x0, 1, transform, 3/monitor = DP-1, 2560x1080@75, 2560x0, 1, transform, 3/
+
+        # Disable laptop-only setup
+        s/^monitor = eDP-1, 2400x1600@120, auto, 1/# monitor = eDP-1, 2400x1600@120, auto, 1/
+    ' "$MONITOR_CONF"
+
+    hyprctl reload
+    echo "✓ Switched to WORK setup (external monitors, laptop screen disabled)"
+}
+
+# Function to switch to home setup (laptop only, external monitors off)
+home_setup() {
+    sed -i '
+        # Disable work setup section
+        s/^monitor = eDP-1, disable/# monitor = eDP-1, disable/
+        s/^monitor = DP-2, 2560x1080@75, 0x420, 1/# monitor = DP-2, 2560x1080@75, 0x420, 1/
+        s/^monitor = DP-1, 2560x1080@75, 2560x0, 1, transform, 3/# monitor = DP-1, 2560x1080@75, 2560x0, 1, transform, 3/
+
+        # Enable laptop-only setup
+        s/^# monitor = eDP-1, 2400x1600@120, auto, 1/monitor = eDP-1, 2400x1600@120, auto, 1/
+    ' "$MONITOR_CONF"
+
+    hyprctl reload
+    echo "✓ Switched to HOME setup (laptop screen only, external monitors disabled)"
+}
+
+# Function to switch to TV setup (4K external display, laptop disabled)
+tv_setup() {
+    sed -i '
+        # Disable work setup section
+        s/^monitor = eDP-1, disable/# monitor = eDP-1, disable/
+        s/^monitor = DP-2, 2560x1080@75, 0x420, 1/# monitor = DP-2, 2560x1080@75, 0x420, 1/
+        s/^monitor = DP-1, 2560x1080@75, 2560x0, 1, transform, 3/# monitor = DP-1, 2560x1080@75, 2560x0, 1, transform, 3/
+
+        # Disable laptop-only setup
+        s/^monitor = eDP-1, 2400x1600@120, auto, 1/# monitor = eDP-1, 2400x1600@120, auto, 1/
+
+        # Enable TV setup section
+        /^# TV SETUP/,/^# Fallback/ {
+            s/^# monitor = eDP-1, disable/monitor = eDP-1, disable/
+            s/^# monitor = , 3840x2160@60, auto, 1/monitor = , 3840x2160@60, auto, 1/
+        }
+    ' "$MONITOR_CONF"
+
+    hyprctl reload
+    echo "✓ Switched to TV setup (4K external display, laptop screen disabled)"
+}
+
+# Function to show current setup
+status() {
+    echo "Current monitor status:"
+    hyprctl monitors | grep -E "^Monitor|description|disabled"
+    echo ""
+
+    if grep -q "^monitor = , 3840x2160@60, auto, 1" "$MONITOR_CONF" && ! grep -q "^# monitor = , 3840x2160@60, auto, 1" "$MONITOR_CONF"; then
+        echo "Config: TV setup (4K external display active)"
+    elif grep -q "^monitor = eDP-1, disable" "$MONITOR_CONF" && ! grep -q "^# monitor = eDP-1, disable" "$MONITOR_CONF"; then
+        echo "Config: WORK setup (external monitors active)"
+    else
+        echo "Config: HOME setup (laptop screen active)"
+    fi
+}
+
+# Main script logic
+case "$1" in
+    work)
+        work_setup
+        ;;
+    home)
+        home_setup
+        ;;
+    tv)
+        tv_setup
+        ;;
+    status)
+        status
+        ;;
+    *)
+        echo "Usage: monitor-switch [work|home|tv|status]"
+        echo ""
+        echo "  work   - Switch to work setup (external monitors, laptop disabled)"
+        echo "  home   - Switch to home setup (laptop only, externals disabled)"
+        echo "  tv     - Switch to TV setup (4K external display, laptop disabled)"
+        echo "  status - Show current monitor configuration"
+        echo ""
+        echo "Examples:"
+        echo "  monitor-switch home    # Switch to laptop-only when leaving work"
+        echo "  monitor-switch work    # Switch to external monitors when arriving at work"
+        echo "  monitor-switch tv      # Switch to 4K TV display"
+        exit 1
+        ;;
+esac
