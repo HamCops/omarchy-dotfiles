@@ -11,6 +11,9 @@ This dotfiles repository contains configurations for:
 - **Display Manager:** SDDM
 - **Terminal:** Alacritty
 - **Shell:** Bash
+- **Theme:** Reverie (dark, elegant theme for deep focus)
+
+📖 **See [THEME_AND_KEYBINDINGS.md](THEME_AND_KEYBINDINGS.md) for complete theme details and keybinding reference**
 
 ## What's Included
 
@@ -30,6 +33,7 @@ omarchy-dotfiles/
 ├── docker/            # Docker/MCP container configs
 ├── packages.txt       # Additional packages beyond base Omarchy (58 packages)
 ├── omarchy-base-packages.txt  # Reference: base Omarchy packages (161 packages)
+├── THEME_AND_KEYBINDINGS.md   # Theme and keybinding documentation
 └── README.md          # This file
 ```
 
